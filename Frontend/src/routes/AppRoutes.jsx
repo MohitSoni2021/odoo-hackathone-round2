@@ -16,6 +16,7 @@ import SignupPage from '../features/auth/SignupPage';
 import ForgotPasswordPage from '../features/auth/ForgotPasswordPage';
 import Dashboard from '../pages/Dashboard';
 import ExploreState from '../pages/ExploreState';
+import CreateNewTrip from '../pages/CreateNewTrip';
 
 // Protected Pages
 // import TripListPage from '../features/trips/TripListPage'; // File does not exist
@@ -163,6 +164,15 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <ExploreState />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/onboarding/newtrip"
+        element={
+          <ProtectedRoute>
+            <CreateNewTrip />
           </ProtectedRoute>
         }
       />

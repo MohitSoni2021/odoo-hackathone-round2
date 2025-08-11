@@ -8,6 +8,7 @@ import NearbyFamousPlaces from '../components/common/NearbyFamousPlaces';
 import OpenRouterChat from '../components/common/test';
 import StateCard from '../components/common/StateCard';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import { Link } from 'react-router-dom';
 
 const Dashboard = () => {
 
@@ -68,8 +69,8 @@ const Dashboard = () => {
                     !location && <LoadingSpinner />
                 }
 
-                {   
-               
+                {
+
                     location && <OpenRouterChat prompt={`List all the nearby famous places to visit near the longitude ${location.lon} and latitude ${location.lat} make sure to give response in form of 
                     [
                     {
@@ -88,6 +89,9 @@ const Dashboard = () => {
                     give only array of object in response`} />
                 }
             </div>
+            <Link to={"/onboarding/newtrip"} className="bg-green-600 text-white font-extrabold px-6 py-3 rounded-xl shadow-lg hover:bg-green-700 active:bg-green-800 backdrop-blur-md transition-all duration-300 ease-in-out fixed right-4 bottom-4 text-lg focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-50">
+                Create New Trip
+            </Link>
         </div>
     )
 }
