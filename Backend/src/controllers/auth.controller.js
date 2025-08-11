@@ -39,13 +39,12 @@ const setRefreshTokenCookie = (res, refreshToken) => {
   });
 };
 
-/**
- * @desc    Register a new user
- * @route   POST /api/v1/auth/signup
- * @access  Public
- */
+
 const signup = asyncHandler(async (req, res) => {
+  console.log("working Signup")
   const { name, email, password, phone, country, city } = req.body;
+
+  console.log(req.body);
 
   // Check if user already exists
   const existingUser = await User.findByEmail(email);

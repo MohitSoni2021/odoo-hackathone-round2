@@ -29,7 +29,7 @@ if (process.env.NODE_ENV === 'production') {
 // Rate limiting
 const authLimiter = new RateLimiterMemory({
   keyGenerator: (req) => req.ip,
-  points: 5, // Number of attempts
+  points: 60, // Number of attempts
   duration: 60, // Per 1 minute
 });
 
