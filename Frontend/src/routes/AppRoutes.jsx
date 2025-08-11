@@ -15,6 +15,7 @@ import LoginPage from '../features/auth/LoginPage';
 import SignupPage from '../features/auth/SignupPage';
 import ForgotPasswordPage from '../features/auth/ForgotPasswordPage';
 import Dashboard from '../pages/Dashboard';
+import ExploreState from '../pages/ExploreState';
 
 // Protected Pages
 // import TripListPage from '../features/trips/TripListPage'; // File does not exist
@@ -153,6 +154,15 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <ProfilePage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/india/:state"
+        element={
+          <ProtectedRoute>
+            <ExploreState />
           </ProtectedRoute>
         }
       />

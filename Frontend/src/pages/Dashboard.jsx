@@ -7,6 +7,7 @@ import { getTopPlaces } from '../utils/GetTopPlaces';
 import NearbyFamousPlaces from '../components/common/NearbyFamousPlaces';
 import OpenRouterChat from '../components/common/test';
 import StateCard from '../components/common/StateCard';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 
 const Dashboard = () => {
 
@@ -63,14 +64,12 @@ const Dashboard = () => {
                         }
                     </>} />
                 </div>
-
-
-                <br />
-                <br />
-                <br />
-                <br />
-                <br />
                 {
+                    !location && <LoadingSpinner />
+                }
+
+                {   
+               
                     location && <OpenRouterChat prompt={`List all the nearby famous places to visit near the longitude ${location.lon} and latitude ${location.lat} make sure to give response in form of 
                     [
                     {

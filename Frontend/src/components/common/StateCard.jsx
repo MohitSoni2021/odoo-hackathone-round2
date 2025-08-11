@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 const StateCard = ({ details }) => {
   return (
@@ -8,6 +9,7 @@ const StateCard = ({ details }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
+      <Link to={`/india/${details.name}`} >
       <div className="flex flex-col relative">
         <div className="w-full">
           <img
@@ -20,6 +22,7 @@ const StateCard = ({ details }) => {
             {details?.name}
         </div>
       </div>
+      </Link>
     </motion.div>
   );
 };
