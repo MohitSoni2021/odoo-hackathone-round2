@@ -30,8 +30,7 @@ const CreateTripPage = () => <div>Create Trip Page (Placeholder)</div>;
 const ItineraryBuilderPage = () => <div>Itinerary Builder Page (Placeholder)</div>;
 // import PublicTripViewPage from '../features/trips/PublicTripViewPage'; // File does not exist
 const PublicTripViewPage = () => <div>Public Trip View Page (Placeholder)</div>;
-// import ProfilePage from '../features/profile/ProfilePage'; // File does not exist
-const ProfilePage = () => <TripForm />;
+import ProfilePage from '../features/profile/ProfilePage';
 // import DashboardPage from '../features/admin/DashboardPage'; // File does not exist
 const DashboardPage = () => <div>Dashboard Page (Placeholder)</div>;
 

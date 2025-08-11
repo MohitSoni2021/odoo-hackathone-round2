@@ -156,55 +156,71 @@ const deleteAccount = asyncHandler(async (req, res) => {
  */
 const getUserStats = asyncHandler(async (req, res) => {
   const Trip = require('../models/trip.model');
+  const mongoose = require('mongoose');
   const userId = req.user._id;
 
-  // Aggregate user statistics
-  const stats = await Trip.aggregate([
-    { $match: { ownerId: userId } },
-    {
-      $group: {
-        _id: null,
-        totalTrips: { $sum: 1 },
-        totalStops: { $sum: { $size: '$stops' } },
-        totalCountries: { $addToSet: '$stops.country' },
-        totalCities: { $addToSet: { $concat: ['$stops.city', ', ', '$stops.country'] } },
-        totalBudget: { $sum: '$budget.total' },
-        avgTripDuration: {
-          $avg: {
-            $divide: [
-              { $subtract: ['$endDate', '$startDate'] },
-              1000 * 60 * 60 * 24 // Convert to days
-            ]
-          }
-        }
+  try {
+    // Ensure userId is a valid ObjectId
+    const objectId = mongoose.Types.ObjectId.isValid(userId) 
+      ? new mongoose.Types.ObjectId(userId) 
+      : userId;
+      
+    // First, get all trips for the user
+    const trips = await Trip.find({ ownerId: objectId });
+    
+    // Calculate statistics manually to avoid complex aggregation issues
+    let totalTrips = trips.length;
+    let totalStops = 0;
+    let countries = new Set();
+    let cities = new Set();
+    let totalBudget = 0;
+    let totalDuration = 0;
+    
+    trips.forEach(trip => {
+      // Count stops
+      totalStops += trip.stops ? trip.stops.length : 0;
+      
+      // Collect unique countries and cities
+      if (trip.stops && trip.stops.length > 0) {
+        trip.stops.forEach(stop => {
+          if (stop.country) countries.add(stop.country);
+          if (stop.city && stop.country) cities.add(`${stop.city}, ${stop.country}`);
+        });
       }
-    },
-    {
-      $project: {
-        _id: 0,
-        totalTrips: 1,
-        totalStops: 1,
-        totalCountries: { $size: '$totalCountries' },
-        totalCities: { $size: '$totalCities' },
-        totalBudget: { $round: ['$totalBudget', 2] },
-        avgTripDuration: { $round: ['$avgTripDuration', 1] },
+      
+      // Sum budget
+      if (trip.budget && trip.budget.total) {
+        totalBudget += trip.budget.total;
       }
-    }
-  ]);
+      
+      // Calculate duration
+      if (trip.startDate && trip.endDate) {
+        const durationMs = new Date(trip.endDate) - new Date(trip.startDate);
+        const durationDays = durationMs / (1000 * 60 * 60 * 24);
+        totalDuration += durationDays;
+      }
+    });
+    
+    // Calculate average duration
+    const avgTripDuration = totalTrips > 0 ? (totalDuration / totalTrips).toFixed(1) : 0;
+    
+    const userStats = {
+      totalTrips,
+      totalStops,
+      totalCountries: countries.size,
+      totalCities: cities.size,
+      totalBudget: Math.round(totalBudget * 100) / 100, // Round to 2 decimal places
+      avgTripDuration: parseFloat(avgTripDuration),
+    };
 
-  const userStats = stats[0] || {
-    totalTrips: 0,
-    totalStops: 0,
-    totalCountries: 0,
-    totalCities: 0,
-    totalBudget: 0,
-    avgTripDuration: 0,
-  };
-
-  sendSuccessResponse(res, {
-    message: 'User statistics retrieved successfully',
-    stats: userStats,
-  });
+    sendSuccessResponse(res, {
+      message: 'User statistics retrieved successfully',
+      stats: userStats,
+    });
+  } catch (error) {
+    logger.error('Error calculating user stats:', error);
+    sendErrorResponse(res, 'Failed to calculate user statistics', 500);
+  }
 });
 
 module.exports = {

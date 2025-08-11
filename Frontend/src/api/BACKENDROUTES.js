@@ -13,7 +13,8 @@ export const API_ROUTES = {
   users: {
     me: `${BASE_URL}/users/me`,
     updateProfile: `${BASE_URL}/users/me`,
-    uploadAvatar: `${BASE_URL}/users/me/avatar`
+    uploadAvatar: `${BASE_URL}/users/me/avatar`,
+    stats: `${BASE_URL}/users/me/stats`
   },
   trips: {
     getAll: `${BASE_URL}/trips`,
