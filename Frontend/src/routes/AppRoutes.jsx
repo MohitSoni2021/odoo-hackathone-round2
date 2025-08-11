@@ -31,6 +31,7 @@ const ItineraryBuilderPage = () => <div>Itinerary Builder Page (Placeholder)</di
 // import PublicTripViewPage from '../features/trips/PublicTripViewPage'; // File does not exist
 const PublicTripViewPage = () => <div>Public Trip View Page (Placeholder)</div>;
 import ProfilePage from '../features/profile/ProfilePage';
+import SeachCity from '../pages/SeachCity';
 // import DashboardPage from '../features/admin/DashboardPage'; // File does not exist
 const DashboardPage = () => <div>Dashboard Page (Placeholder)</div>;
 
@@ -159,11 +160,20 @@ const AppRoutes = () => {
         }
       />
 
-      <Route
+      {/* <Route
         path="/india/:state"
         element={
           <ProtectedRoute>
             <ExploreState />
+          </ProtectedRoute>
+        }
+      /> */}
+
+      <Route
+        path="/india/:state"
+        element={
+          <ProtectedRoute>
+            <SeachCity />
           </ProtectedRoute>
         }
       />

@@ -53,9 +53,15 @@ export const DATE_FORMATS = {
 export const VALIDATION_RULES = {
   EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
   PASSWORD_MIN_LENGTH: 8,
+  PASSWORD_PATTERN: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+  PASSWORD_MESSAGE: 'Password must contain at least one uppercase letter, one lowercase letter, and one number',
   NAME_MIN_LENGTH: 2,
+  NAME_MAX_LENGTH: 100,
   TRIP_NAME_MIN_LENGTH: 3,
-  TRIP_NAME_MAX_LENGTH: 100
+  TRIP_NAME_MAX_LENGTH: 100,
+  PHONE_PATTERN: /^\+?[1-9]\d{1,14}$/,
+  COUNTRY_MAX_LENGTH: 100,
+  CITY_MAX_LENGTH: 100
 };
 
 export const API_STATUS = {

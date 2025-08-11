@@ -33,17 +33,7 @@ export const signupUser = createAsyncThunk(
   'auth/signup',
   async ({ name, email, password, phone, country, city }, { rejectWithValue }) => {
     try {
-      // const response = await axiosInstance.post(API_ROUTES.auth.signup, {
-      //   name,
-      //   email,
-      //   password,
-      //   ...(phone && { phone }),
-      //   ...(country && { country }),
-      //   ...(city && { city })
-      // });
-      // toast.success('Account created successfully! Please verify your email.');
-      // return response.data;
-      const response = await axios.post('http://localhost:5000/api/v1/auth/signup', {
+      const response = await axiosInstance.post(API_ROUTES.auth.signup, {
         name,
         email,
         password,
@@ -51,9 +41,8 @@ export const signupUser = createAsyncThunk(
         ...(country && { country }),
         ...(city && { city })
       });
-      console.log(response.data);
+      return response.data;
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Signup failed');
       return rejectWithValue(error.response?.data?.message || 'Signup failed');
     }
   }

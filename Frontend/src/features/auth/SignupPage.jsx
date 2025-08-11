@@ -1,35 +1,46 @@
 import React, { useState, useEffect } from 'react';
-import { Link, redirect, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import { User, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { User, Mail, Lock, Eye, EyeOff, Phone, MapPin } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { signupUser, clearError } from './AuthSlice';
 import { API_STATUS, VALIDATION_RULES } from '../../utils/constants';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
 import Card from '../../components/common/Card';
-import axios from 'axios';
+import toast from 'react-hot-toast';
 
 const schema = yup.object({
   name: yup
     .string()
     .min(VALIDATION_RULES.NAME_MIN_LENGTH, `Name must be at least ${VALIDATION_RULES.NAME_MIN_LENGTH} characters`)
+    .max(VALIDATION_RULES.NAME_MAX_LENGTH, `Name cannot exceed ${VALIDATION_RULES.NAME_MAX_LENGTH} characters`)
     .required('Name is required'),
   email: yup.string().email('Invalid email').required('Email is required'),
   password: yup
     .string()
     .min(VALIDATION_RULES.PASSWORD_MIN_LENGTH, `Password must be at least ${VALIDATION_RULES.PASSWORD_MIN_LENGTH} characters`)
+    .matches(VALIDATION_RULES.PASSWORD_PATTERN, VALIDATION_RULES.PASSWORD_MESSAGE)
     .required('Password is required'),
   confirmPassword: yup
     .string()
     .oneOf([yup.ref('password'), null], 'Passwords must match')
     .required('Confirm password is required'),
-  phone: yup.string().notRequired(),
-  country: yup.string().notRequired(),
-  city: yup.string().notRequired(),
+  phone: yup
+    .string()
+    .matches(VALIDATION_RULES.PHONE_PATTERN, 'Please provide a valid phone number')
+    .notRequired(),
+  country: yup
+    .string()
+    .max(VALIDATION_RULES.COUNTRY_MAX_LENGTH, `Country name cannot exceed ${VALIDATION_RULES.COUNTRY_MAX_LENGTH} characters`)
+    .notRequired(),
+  city: yup
+    .string()
+    .max(VALIDATION_RULES.CITY_MAX_LENGTH, `City name cannot exceed ${VALIDATION_RULES.CITY_MAX_LENGTH} characters`)
+    .notRequired(),
 });
 
 const SignupPage = () => {
@@ -58,12 +69,13 @@ const SignupPage = () => {
 
   const onSubmit = async (data) => {
     const { confirmPassword, ...signupData } = data;
-    // dispatch(signupUser(signupData));
-    const response = await axios.post("http://localhost:5000/api/v1/auth/signup", signupData);
-    console.log("working onSubmit")
-    console.log(response.data);
-    // console.log(signupData);
-    navigate('/login');
+    try {
+      await dispatch(signupUser(signupData)).unwrap();
+      toast.success('Account created successfully! Please check your email to verify your account.');
+      navigate('/login');
+    } catch (error) {
+      toast.error(error || 'Signup failed');
+    }
   };
 
   return (
@@ -90,16 +102,6 @@ const SignupPage = () => {
             </motion.div>
           )}
 
-          {status === API_STATUS.SUCCESS && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6"
-            >
-              Account created successfully! Please check your email to verify your account.
-            </motion.div>
-          )}
-
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <Input
               {...register('name')}
@@ -123,26 +125,28 @@ const SignupPage = () => {
 
             <Input
               {...register('phone')}
-              type="text"
+              type="tel"
               label="Phone (optional)"
               placeholder="Enter your phone number"
-              icon={<User size={18} />}
+              icon={<Phone size={18} />}
               error={errors.phone?.message}
             />
+
             <Input
               {...register('country')}
               type="text"
               label="Country (optional)"
               placeholder="Enter your country"
-              icon={<User size={18} />}
+              icon={<MapPin size={18} />}
               error={errors.country?.message}
             />
+
             <Input
               {...register('city')}
               type="text"
               label="City (optional)"
               placeholder="Enter your city"
-              icon={<User size={18} />}
+              icon={<MapPin size={18} />}
               error={errors.city?.message}
             />
 
@@ -196,36 +200,25 @@ const SignupPage = () => {
                 I agree to the{' '}
                 <Link to="/terms" className="text-blue-600 hover:text-blue-500">
                   Terms and Conditions
-                </Link>{' '}
-                and{' '}
-                <Link to="/privacy" className="text-blue-600 hover:text-blue-500">
-                  Privacy Policy
                 </Link>
               </label>
             </div>
 
             <Button
               type="submit"
-              variant="secondary"
-              size="lg"
-              loading={status === API_STATUS.LOADING}
               className="w-full"
+              loading={status === API_STATUS.LOADING}
             >
               Create Account
             </Button>
-          </form>
 
-          <div className="mt-8 text-center">
-            <p className="text-gray-600">
+            <p className="text-center text-sm text-gray-600">
               Already have an account?{' '}
-              <Link
-                to="/login"
-                className="font-medium text-blue-600 hover:text-blue-500"
-              >
-                Sign in here
+              <Link to="/login" className="text-blue-600 hover:text-blue-500">
+                Sign in
               </Link>
             </p>
-          </div>
+          </form>
         </Card>
       </motion.div>
     </div>

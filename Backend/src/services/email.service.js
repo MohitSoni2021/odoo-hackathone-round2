@@ -3,14 +3,12 @@ const logger = require('../config/logger');
 
 // Create reusable transporter
 const createTransporter = () => {
-  return nodemailer.createTransporter({
-    host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT,
-    secure: process.env.SMTP_PORT == 465, // true for 465, false for other ports
+  return nodemailer.createTransport({
+    service: 'gmail',
     auth: {
       user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
+      pass: process.env.SMTP_PASS
+    }
   });
 };
 
@@ -20,7 +18,7 @@ const createTransporter = () => {
 const sendVerificationEmail = async (email, name, token) => {
   try {
     const transporter = createTransporter();
-    const verificationUrl = `${process.env.APP_URL}/api/v1/auth/verify-email?token=${token}`;
+    const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
 
     const mailOptions = {
       from: `"GlobeTrotter" <${process.env.SMTP_USER}>`,
@@ -87,7 +85,7 @@ const sendVerificationEmail = async (email, name, token) => {
 const sendPasswordResetEmail = async (email, name, token) => {
   try {
     const transporter = createTransporter();
-    const resetUrl = `${process.env.APP_URL}/reset-password?token=${token}`;
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
 
     const mailOptions = {
       from: `"GlobeTrotter" <${process.env.SMTP_USER}>`,
@@ -190,15 +188,11 @@ const sendWelcomeEmail = async (email, name) => {
               <li>Explore public trips from other travelers</li>
             </ul>
             <div style="text-align: center; margin: 30px 0;">
-              <a href="${process.env.APP_URL}" 
+              <a href="${process.env.FRONTEND_URL}/dashboard" 
                  style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 25px; font-weight: bold; display: inline-block; font-size: 16px;">
-                Start Planning Your Trip
+                Start Planning
               </a>
             </div>
-            <p style="font-size: 14px; color: #666;">
-              Happy travels!<br>
-              The GlobeTrotter Team
-            </p>
           </div>
         </body>
         </html>
@@ -217,7 +211,7 @@ const sendWelcomeEmail = async (email, name) => {
         - Share your trips with friends and family
         - Explore public trips from other travelers
         
-        Start planning: ${process.env.APP_URL}
+        Start planning: ${process.env.FRONTEND_URL}/dashboard
         
         Happy travels!
         The GlobeTrotter Team

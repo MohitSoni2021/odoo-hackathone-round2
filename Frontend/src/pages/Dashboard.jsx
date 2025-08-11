@@ -10,12 +10,14 @@ import StateCard from '../components/common/StateCard';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { Link } from 'react-router-dom';
 import ImageUpload from '../utils/ImageUpload';
+import CitySearch from '../components/common/CitySearch'; // Import the CitySearch component
 
 const Dashboard = () => {
 
     const [location, setLocation] = useState();
     const [locationError, setLocationError] = useState(null);
     const [places, setPlaces] = useState([]);
+    const [selectedCities, setSelectedCities] = useState([]); // State to track selected cities
 
     useEffect(() => {
         if ("geolocation" in navigator) {
@@ -35,20 +37,25 @@ const Dashboard = () => {
         }
     }, []);
 
-
-
+    // Handle adding cities to trip
+    const handleAddToTrip = (city) => {
+        setSelectedCities(prev => [...prev, city]);
+    };
 
     return (
         <div>
             <div className='p-10 flex flex-col gap-12'>
                 <ImageCarousel items={HighlightImages} />
 
+                {/* City Search Component */}
+                <CitySearch onAddToTrip={handleAddToTrip} />
+
                 <div>
                     <CardCarousel heading={"Discover States of India"} children={<>
                         {
                             indianStates.map((ele, id) => {
                                 return (
-                                    <StateCard details={ele} />
+                                    <StateCard details={ele} key={id} />
                                 )
                             })
                         }
@@ -60,7 +67,7 @@ const Dashboard = () => {
                         {
                             famousPlacesGujarat.map((ele, id) => {
                                 return (
-                                    <PlaceCard details={ele} />
+                                    <PlaceCard details={ele} key={id} />
                                 )
                             })
                         }
