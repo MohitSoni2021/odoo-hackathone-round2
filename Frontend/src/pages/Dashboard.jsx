@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react'
 import ImageCarousel from '../components/common/ImageBanner';
-import HighlightImages from '../DataCenter/HighlighImages';
+import HighlightImages, { famousPlacesGujarat, indianStates } from '../DataCenter/HighlighImages';
 import PlaceCard from '../components/common/PlaceDetailCard';
 import CardCarousel from '../components/common/GenericImageCardHolder';
+import { getTopPlaces } from '../utils/GetTopPlaces';
+import NearbyFamousPlaces from '../components/common/NearbyFamousPlaces';
+import OpenRouterChat from '../components/common/test';
+import StateCard from '../components/common/StateCard';
 
 const Dashboard = () => {
 
-    const [location, setLocation] = useState(null);
+    const [location, setLocation] = useState();
     const [locationError, setLocationError] = useState(null);
     const [places, setPlaces] = useState([]);
 
@@ -28,15 +32,62 @@ const Dashboard = () => {
         }
     }, []);
 
-    
+
 
 
     return (
         <div>
-            <div className='p-10'>
+            <div className='p-10 flex flex-col gap-12'>
                 <ImageCarousel items={HighlightImages} />
-                <PlaceCard name="Taj Mahal" location="Agra, India" bestTime="March - May" weather="20°C - 30°C" activities="Sightseeing, Hiking, Local Cuisine" rating="★★★★☆ (4.5/5)" imageUrl="https://plus.unsplash.com/premium_photo-1661885523029-fc960a2bb4f3?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" />
-                <CardCarousel heading={"Most Famous Places"} children={<PlaceCard name="Taj Mahal" location="Agra, India" bestTime="March - May" weather="20°C - 30°C" activities="Sightseeing, Hiking, Local Cuisine" rating="★★★★☆ (4.5/5)" imageUrl="https://plus.unsplash.com/premium_photo-1661885523029-fc960a2bb4f3?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" />} />
+
+                <div>
+                    <CardCarousel heading={"Discover States of India"} children={<>
+                        {
+                            indianStates.map((ele, id) => {
+                                return (
+                                    <StateCard details={ele} />
+                                )
+                            })
+                        }
+                    </>} />
+                </div>
+
+                <div>
+                    <CardCarousel heading={"Religious Places"} children={<>
+                        {
+                            famousPlacesGujarat.map((ele, id) => {
+                                return (
+                                    <PlaceCard details={ele} />
+                                )
+                            })
+                        }
+                    </>} />
+                </div>
+
+
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                {
+                    location && <OpenRouterChat prompt={`List all the nearby famous places to visit near the longitude ${location.lon} and latitude ${location.lat} make sure to give response in form of 
+                    [
+                    {
+                          name: "Dholavira Archaeological Site",
+                          imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT0nsSmyC7uiZGEvmBcxYVwZWgOrxaFHFnVebhR3N1ZURqeqjMWoIxf7Mt_qasZV7Pb6F0&usqp=CAU",
+                          location: "Kutch, Gujarat",
+                          bestTime: "October - March",
+                          weather: "12°C - 25°C",
+                          activities: "Heritage Tours, Archaeology",
+                          rating: "★★★★☆ (4.8/5)",
+                          maplink: "https://www.google.com/maps/search/?api=1&query=}"
+                        }
+                    ]
+                    
+                    this type of array of object 
+                    give only array of object in response`} />
+                }
             </div>
         </div>
     )
