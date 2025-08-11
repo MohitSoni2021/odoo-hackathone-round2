@@ -91,9 +91,14 @@ const Dashboard = () => {
                     <ImageUpload />
                 }
             </div>
-            <Link to={"/onboarding/newtrip"} className="bg-green-600 text-white font-extrabold px-6 py-3 rounded-xl shadow-lg hover:bg-green-700 active:bg-green-800 backdrop-blur-md transition-all duration-300 ease-in-out fixed right-4 bottom-4 text-lg focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-50">
-                Create New Trip
-            </Link>
+            <div className="fixed right-4 bottom-4 flex flex-col space-y-2">
+                <Link to={"/trips"} className="bg-blue-600 text-white font-extrabold px-6 py-3 rounded-xl shadow-lg hover:bg-blue-700 active:bg-blue-800 backdrop-blur-md transition-all duration-300 ease-in-out text-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50">
+                    My Trips
+                </Link>
+                <Link to={"/onboarding/newtrip"} className="bg-green-600 text-white font-extrabold px-6 py-3 rounded-xl shadow-lg hover:bg-green-700 active:bg-green-800 backdrop-blur-md transition-all duration-300 ease-in-out text-lg focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-50">
+                    Create New Trip
+                </Link>
+            </div>
         </div>
     )
 }

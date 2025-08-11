@@ -18,11 +18,14 @@ export const useAuth = () => {
   const isAdmin = user?.role === 'admin';
   const isLoading = status === 'loading';
 
+  const token = localStorage.getItem(LOCAL_STORAGE_KEYS.ACCESS_TOKEN);
+
   return {
     user,
     isAuthenticated,
     isAdmin,
-    isLoading
+    isLoading,
+    token
   };
 };
 

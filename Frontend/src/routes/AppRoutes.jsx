@@ -22,10 +22,8 @@ import TripForm from '../pages/UpdateNewTrip';
 import CreateActivity from '../pages/CreateActivity';
 
 // Protected Pages
-// import TripListPage from '../features/trips/TripListPage'; // File does not exist
-const TripListPage = () => <Dashboard />;
-// import TripDetailsPage from '../features/trips/TripDetailsPage'; // File does not exist
-const TripDetailsPage = () => <div>Trip Details Page (Placeholder)</div>;
+import TripList from '../pages/TripList';
+import ViewTrip from '../pages/ViewTrip';
 // import CreateTripPage from '../features/trips/CreateTripPage'; // File does not exist
 const CreateTripPage = () => <div>Create Trip Page (Placeholder)</div>;
 // import ItineraryBuilderPage from '../features/trips/ItineraryBuilderPage'; // File does not exist
@@ -117,7 +115,7 @@ const AppRoutes = () => {
         path="/dashboard"
         element={
           <ProtectedRoute>
-            <TripListPage />
+            <Dashboard />
           </ProtectedRoute>
         }
       />
@@ -125,7 +123,7 @@ const AppRoutes = () => {
         path="/trips"
         element={
           <ProtectedRoute>
-            <TripListPage />
+            <TripList />
           </ProtectedRoute>
         }
       />
@@ -133,7 +131,7 @@ const AppRoutes = () => {
         path="/trips/new"
         element={
           <ProtectedRoute>
-            <CreateTripPage />
+            <CreateNewTrip />
           </ProtectedRoute>
         }
       />
@@ -141,7 +139,7 @@ const AppRoutes = () => {
         path="/trips/:id"
         element={
           <ProtectedRoute>
-            <TripDetailsPage />
+            <ViewTrip />
           </ProtectedRoute>
         }
       />
