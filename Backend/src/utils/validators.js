@@ -196,6 +196,16 @@ const updateBudgetValidation = [
 
 // Stop validators
 const addStopValidation = [
+  body('name')
+    .optional()
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage('Stop name cannot exceed 100 characters'),
+  body('description')
+    .optional()
+    .trim()
+    .isLength({ max: 500 })
+    .withMessage('Description cannot exceed 500 characters'),
   body('city')
     .trim()
     .isLength({ min: 1, max: 100 })
@@ -225,6 +235,16 @@ const addStopValidation = [
 ];
 
 const updateStopValidation = [
+  body('name')
+    .optional()
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage('Stop name cannot exceed 100 characters'),
+  body('description')
+    .optional()
+    .trim()
+    .isLength({ max: 500 })
+    .withMessage('Description cannot exceed 500 characters'),
   body('city')
     .optional()
     .trim()

@@ -1,4 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
+import axiosInstance from '../api/axiosInstance';
+import { API_ROUTES } from '../api/BACKENDROUTES';
+import toast from 'react-hot-toast';
 
 const CreateNewTrip = () => {
   const [step, setStep] = useState(1);
@@ -8,6 +13,18 @@ const CreateNewTrip = () => {
     startDate: '',
     endDate: '',
   });
+  const [dateError, setDateError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    // Redirect if not authenticated
+    if (!isAuthenticated) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, navigate]);
 
   const suggestions = [
     { id: 1, title: "Varanasi Ganga Aarti", image: "https://images.unsplash.com/photo-1607500369969-4fadd3f7d156?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=60" },
@@ -20,10 +37,29 @@ const CreateNewTrip = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    const newFormData = { ...formData, [name]: value };
+
+    // Date validation
+    if (name === 'startDate' || name === 'endDate') {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const start = new Date(newFormData.startDate);
+      const end = new Date(newFormData.endDate);
+      
+      if (newFormData.startDate && start < today) {
+        setDateError('Start date cannot be before today');
+      } else if (newFormData.startDate && newFormData.endDate && start > end) {
+        setDateError('Start date must be before end date');
+      } else {
+        setDateError('');
+      }
+    }
+
+    setFormData(newFormData);
   };
 
   const nextStep = () => {
+    if (step === 1 && dateError) return; // Prevent moving to next step if there's a date error
     if (step < 3) setStep(step + 1);
   };
 
@@ -31,16 +67,40 @@ const CreateNewTrip = () => {
     if (step > 1) setStep(step - 1);
   };
 
-  const handleSubmit = () => {
-    // Handle form submission (e.g., API call or console log for demo)
-    console.log('Form submitted:', formData);
+  const handleSubmit = async () => {
+    if (dateError) return; // Prevent submission if there's a date error
+    if (!formData.tripName || !formData.startDate || !formData.endDate) {
+      setSubmitError('Please fill in all required fields');
+      return;
+    }
+    
+    setIsSubmitting(true);
+    setSubmitError('');
+    
+    try {
+      const response = await axiosInstance.post(API_ROUTES.trips.create, {
+        title: formData.tripName,
+        description: formData.destination,
+        startDate: formData.startDate,
+        endDate: formData.endDate,
+        isPublic: false
+      });
+      
+      toast.success('Trip created successfully!');
+      // Redirect to trips page or show success message
+      navigate('/trips');
+    } catch (error) {
+      console.error('Error creating trip:', error);
+      setSubmitError(error.response?.data?.message || 'Failed to create trip. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const renderStep = () => {
     switch (step) {
       case 1:
         return (
-            <>
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-2">Trip Name</label>
@@ -53,19 +113,6 @@ const CreateNewTrip = () => {
                 placeholder="Enter trip name"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">Destination</label>
-              <input
-                type="text"
-                name="destination"
-                value={formData.destination}
-                onChange={handleInputChange}
-                className="w-full p-3 bg-gray-100 rounded-lg border border-gray-300 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 input-focus"
-                placeholder="Enter destination"
-              />
-            </div>
-          </div>
-          <div className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-600 mb-2">Start Date</label>
@@ -74,7 +121,7 @@ const CreateNewTrip = () => {
                   name="startDate"
                   value={formData.startDate}
                   onChange={handleInputChange}
-                  className="w-full p-3 bg-gray-100 rounded-lg border border-gray-300 text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500 input-focus"
+                  className={`w-full p-3 bg-gray-100 rounded-lg border ${dateError ? 'border-red-500' : 'border-gray-300'} text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500 input-focus`}
                 />
               </div>
               <div>
@@ -84,37 +131,30 @@ const CreateNewTrip = () => {
                   name="endDate"
                   value={formData.endDate}
                   onChange={handleInputChange}
-                  className="w-full p-3 bg-gray-100 rounded-lg border border-gray-300 text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500 input-focus"
+                  className={`w-full p-3 bg-gray-100 rounded-lg border ${dateError ? 'border-red-500' : 'border-gray-300'} text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500 input-focus`}
                 />
               </div>
             </div>
+            {dateError && (
+              <p className="text-red-500 text-sm mt-2">{dateError}</p>
+            )}
+            {submitError && (
+              <p className="text-red-500 text-sm mt-2">{submitError}</p>
+            )}
           </div>
-          </>
         );
       case 2:
         return (
           <div className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-600 mb-2">Start Date</label>
-                <input
-                  type="date"
-                  name="startDate"
-                  value={formData.startDate}
-                  onChange={handleInputChange}
-                  className="w-full p-3 bg-gray-100 rounded-lg border border-gray-300 text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500 input-focus"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-600 mb-2">End Date</label>
-                <input
-                  type="date"
-                  name="endDate"
-                  value={formData.endDate}
-                  onChange={handleInputChange}
-                  className="w-full p-3 bg-gray-100 rounded-lg border border-gray-300 text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500 input-focus"
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-2">Destination</label>
+              <textarea
+                name="destination"
+                value={formData.destination}
+                onChange={handleInputChange}
+                className="w-full h-64 p-3 bg-gray-100 rounded-lg border border-gray-300 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 input-focus"
+                placeholder="Enter destination"
+              />
             </div>
           </div>
         );
@@ -184,11 +224,11 @@ const CreateNewTrip = () => {
           }
         `}
       </style>
-      <div className="w-full max-w-3xl mx-auto p-6 fade-in bg-gray-50 min-h-screen">
+      <div className="w-full max-w-full flex flex-col items-center mx-auto p-6 fade-in bg-gray-50 min-h-screen">
         <h1 className="text-4xl font-extrabold text-gray-800 mb-8 text-center tracking-tight">
           Plan Your Next Adventure
         </h1>
-        <div className="bg-white p-8 rounded-2xl shadow-md border border-gray-200">
+        <div className="bg-white min-w-full p-8 rounded-2xl shadow-md border border-gray-200">
           <div className="step-indicator">
             <div className={`step ${step === 1 ? 'active' : ''}`}>1</div>
             <div className={`step ${step === 2 ? 'active' : ''}`}>2</div>
@@ -208,21 +248,23 @@ const CreateNewTrip = () => {
             {step < 3 ? (
               <button
                 onClick={nextStep}
-                className="bg-green-600 text-white font-extrabold px-6 py-3 rounded-xl shadow-lg hover:bg-green-700 active:bg-green-800 transition-all duration-300 ease-in-out ml-auto focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-50"
+                className={`bg-green-600 text-white font-extrabold px-6 py-3 rounded-xl shadow-lg hover:bg-green-700 active:bg-green-800 transition-all duration-300 ease-in-out ml-auto focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-50 ${dateError ? 'opacity-50 cursor-not-allowed' : ''}`}
+                disabled={dateError}
               >
                 Next
               </button>
             ) : (
               <button
                 onClick={handleSubmit}
-                className="bg-green-600 text-white font-extrabold px-6 py-3 rounded-xl shadow-lg hover:bg-green-700 active:bg-green-800 transition-all duration-300 ease-in-out ml-auto focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-50"
+                className={`bg-green-600 text-white font-extrabold px-6 py-3 rounded-xl shadow-lg hover:bg-green-700 active:bg-green-800 transition-all duration-300 ease-in-out ml-auto focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-50 ${(dateError || isSubmitting) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                disabled={dateError || isSubmitting}
               >
-                Create New Trip
+                {isSubmitting ? 'Creating...' : 'Create New Trip'}
               </button>
             )}
           </div>
         </div>
-        <div className="mt-8">
+        <div className="mt-8 w-full">
           <h3 className="text-2xl font-semibold text-gray-700 mb-6">Suggested Destinations</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {suggestions.map((suggestion) => (

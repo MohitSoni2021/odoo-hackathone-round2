@@ -17,6 +17,9 @@ import ForgotPasswordPage from '../features/auth/ForgotPasswordPage';
 import Dashboard from '../pages/Dashboard';
 import ExploreState from '../pages/ExploreState';
 import CreateNewTrip from '../pages/CreateNewTrip';
+import CreateStop from '../pages/CreateStop';
+import TripForm from '../pages/UpdateNewTrip';
+import CreateActivity from '../pages/CreateActivity';
 
 // Protected Pages
 // import TripListPage from '../features/trips/TripListPage'; // File does not exist
@@ -30,7 +33,7 @@ const ItineraryBuilderPage = () => <div>Itinerary Builder Page (Placeholder)</di
 // import PublicTripViewPage from '../features/trips/PublicTripViewPage'; // File does not exist
 const PublicTripViewPage = () => <div>Public Trip View Page (Placeholder)</div>;
 // import ProfilePage from '../features/profile/ProfilePage'; // File does not exist
-const ProfilePage = () => <div>Profile Page (Placeholder)</div>;
+const ProfilePage = () => <TripForm />;
 // import DashboardPage from '../features/admin/DashboardPage'; // File does not exist
 const DashboardPage = () => <div>Dashboard Page (Placeholder)</div>;
 
@@ -173,6 +176,24 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <CreateNewTrip />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/onboarding/newstop"
+        element={
+          <ProtectedRoute>
+            <CreateStop />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/onboarding/newactivity"
+        element={
+          <ProtectedRoute>
+            <CreateActivity />
           </ProtectedRoute>
         }
       />

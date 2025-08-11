@@ -19,6 +19,7 @@ const {
   deleteTrip,
   updateTripBudget,
   getTripSummary,
+  getTripsByEmail,
   addStop,
   updateStop,
   deleteStop,
@@ -44,6 +45,7 @@ router.route('/:id')
 
 router.put('/:id/budget', checkOwnership(Trip), validate(updateBudgetValidation), updateTripBudget);
 router.get('/:id/summary', checkOwnership(Trip), getTripSummary);
+router.get('/email/:email', getTripsByEmail);
 
 // Stop routes
 router.post('/:tripId/stops', checkOwnership(Trip, 'tripId'), validate(addStopValidation), addStop);

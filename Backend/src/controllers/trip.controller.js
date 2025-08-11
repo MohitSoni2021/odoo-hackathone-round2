@@ -54,6 +54,7 @@ const createTrip = asyncHandler(async (req, res) => {
 
   const trip = await Trip.create({
     ownerId: req.user._id,
+    ownerEmail: req.user.email,
     title,
     description,
     startDate,
@@ -172,13 +173,63 @@ const getTripSummary = asyncHandler(async (req, res) => {
 });
 
 /**
+ * @desc    Get all trips by user email
+ * @route   GET /api/v1/trips/email/:email
+ * @access  Private
+ */
+const getTripsByEmail = asyncHandler(async (req, res) => {
+  const { email } = req.params;
+  
+  // Ensure user can only access their own trips by email
+  if (email !== req.user.email && req.user.role !== 'admin') {
+    return sendErrorResponse(res, 'You are not authorized to access these trips', 403);
+  }
+  
+  const { page = 1, limit = 10, sortBy = 'createdAt', sortOrder = 'desc' } = req.query;
+  
+  // Build filter
+  const filter = { ownerEmail: email };
+  
+  // Build sort object
+  const sort = {};
+  sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
+
+  // Get paginated results
+  const { data: trips, pagination } = await getPaginationData(
+    Trip,
+    filter,
+    { page: parseInt(page), limit: parseInt(limit), sort }
+  );
+
+  sendSuccessResponse(res, {
+    message: 'Trips retrieved successfully',
+    trips,
+    pagination,
+  });
+});
+
+/**
  * @desc    Add stop to trip
  * @route   POST /api/v1/trips/:tripId/stops
  * @access  Private
  */
 const addStop = asyncHandler(async (req, res) => {
   const trip = req.resource; // Set by checkOwnership middleware
-  const { city, country, startDate, endDate, bannerImage } = req.body;
+  const { city, country, startDate, endDate, bannerImage, name, description } = req.body;
+
+  // Validate that stop dates are within trip dates
+  const stopStartDate = new Date(startDate);
+  const stopEndDate = new Date(endDate);
+  const tripStartDate = new Date(trip.startDate);
+  const tripEndDate = new Date(trip.endDate);
+
+  if (stopStartDate < tripStartDate) {
+    return sendErrorResponse(res, 'Stop start date cannot be before trip start date', 400);
+  }
+
+  if (stopEndDate > tripEndDate) {
+    return sendErrorResponse(res, 'Stop end date cannot be after trip end date', 400);
+  }
 
   const stopData = {
     city,
@@ -186,6 +237,8 @@ const addStop = asyncHandler(async (req, res) => {
     startDate,
     endDate,
     bannerImage,
+    name,
+    description,
     activities: [],
   };
 
@@ -208,11 +261,41 @@ const addStop = asyncHandler(async (req, res) => {
 const updateStop = asyncHandler(async (req, res) => {
   const trip = req.resource; // Set by checkOwnership middleware
   const { stopId } = req.params;
-  const { city, country, startDate, endDate, bannerImage } = req.body;
+  const { city, country, startDate, endDate, bannerImage, name, description } = req.body;
 
   const stop = trip.stops.id(stopId);
   if (!stop) {
     return sendErrorResponse(res, 'Stop not found', 404);
+  }
+
+  // Validate that stop dates are within trip dates if they're being updated
+  const tripStartDate = new Date(trip.startDate);
+  const tripEndDate = new Date(trip.endDate);
+
+  if (startDate !== undefined) {
+    const newStartDate = new Date(startDate);
+    if (newStartDate < tripStartDate) {
+      return sendErrorResponse(res, 'Stop start date cannot be before trip start date', 400);
+    }
+    
+    // If end date is not being updated, check against existing end date
+    const stopEndDate = endDate ? new Date(endDate) : new Date(stop.endDate);
+    if (newStartDate > stopEndDate) {
+      return sendErrorResponse(res, 'Stop start date cannot be after stop end date', 400);
+    }
+  }
+
+  if (endDate !== undefined) {
+    const newEndDate = new Date(endDate);
+    if (newEndDate > tripEndDate) {
+      return sendErrorResponse(res, 'Stop end date cannot be after trip end date', 400);
+    }
+    
+    // If start date is not being updated, check against existing start date
+    const stopStartDate = startDate ? new Date(startDate) : new Date(stop.startDate);
+    if (newEndDate < stopStartDate) {
+      return sendErrorResponse(res, 'Stop end date cannot be before stop start date', 400);
+    }
   }
 
   // Update stop fields
@@ -221,6 +304,8 @@ const updateStop = asyncHandler(async (req, res) => {
   if (startDate !== undefined) stop.startDate = startDate;
   if (endDate !== undefined) stop.endDate = endDate;
   if (bannerImage !== undefined) stop.bannerImage = bannerImage;
+  if (name !== undefined) stop.name = name;
+  if (description !== undefined) stop.description = description;
 
   await trip.save();
 
@@ -358,6 +443,7 @@ module.exports = {
   deleteTrip,
   updateTripBudget,
   getTripSummary,
+  getTripsByEmail,
   addStop,
   updateStop,
   deleteStop,

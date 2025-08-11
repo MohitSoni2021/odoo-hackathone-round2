@@ -2,6 +2,16 @@ const mongoose = require('mongoose');
 const activitySchema = require('./activity.model');
 
 const stopSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    trim: true,
+    maxlength: [100, 'Stop name cannot exceed 100 characters'],
+  },
+  description: {
+    type: String,
+    trim: true,
+    maxlength: [500, 'Description cannot exceed 500 characters'],
+  },
   city: {
     type: String,
     required: [true, 'City is required'],

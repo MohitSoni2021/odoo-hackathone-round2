@@ -36,6 +36,11 @@ const tripSchema = new mongoose.Schema({
     required: [true, 'Owner ID is required'],
     index: true,
   },
+  ownerEmail: {
+    type: String,
+    required: [true, 'Owner email is required'],
+    index: true,
+  },
   title: {
     type: String,
     required: [true, 'Trip title is required'],
@@ -50,6 +55,12 @@ const tripSchema = new mongoose.Schema({
   startDate: {
     type: Date,
     required: [true, 'Start date is required'],
+    validate: {
+      validator: function(value) {
+        return value >= new Date().setHours(0, 0, 0, 0);
+      },
+      message: 'Start date cannot be before today'
+    }
   },
   endDate: {
     type: Date,
