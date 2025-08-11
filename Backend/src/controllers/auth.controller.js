@@ -111,7 +111,7 @@ const login = asyncHandler(async (req, res) => {
   // Save refresh token to user
   user.refreshToken = refreshToken;
   await user.updateLastLogin();
-  await user.save({ validateBeforeSave: false });
+  await user.save({ validateBeforeSave: true });
 
   // Set refresh token cookie
   setRefreshTokenCookie(res, refreshToken);
