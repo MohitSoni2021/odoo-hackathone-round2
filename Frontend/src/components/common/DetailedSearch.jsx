@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import parse from 'html-react-parser'
+import { useParams, Link } from "react-router-dom";
+import parse from 'html-react-parser';
 import LoadingSpinner from "./LoadingSpinner";
+import { MapPin, AlertCircle, Info, ArrowLeft, Globe, Clock, Calendar, Users, Building, Landmark } from "lucide-react";
+import { motion } from "framer-motion";
 
 const prompt = (CITY_NAME) => {
   return (`
@@ -74,12 +76,15 @@ const DetailedSearch = () => {
   const [query, setQuery] = useState(prompt(state));
   const [answer, setAnswer] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [showFullContent, setShowFullContent] = useState(false);
 
   const handleSearch = async () => {
     if (!query.trim()) return;
 
     setLoading(true);
     setAnswer("");
+    setError(null);
 
     try {
       const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -94,37 +99,186 @@ const DetailedSearch = () => {
         }),
       });
 
+      if (!res.ok) {
+        throw new Error(`API request failed with status ${res.status}`);
+      }
+
       const data = await res.json();
       if (data?.choices?.[0]?.message?.content) {
         setAnswer(data.choices[0].message.content);
+        setShowFullContent(false); // Reset expanded state on new content
       } else {
-        setAnswer("No response from AI.");
+        setError("No response content received from AI.");
       }
     } catch (error) {
       console.error("Error fetching from OpenRouter:", error);
-      setAnswer("Error fetching answer.");
+      setError(error.message || "Error fetching city information.");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(()=>{
+  useEffect(() => {
     handleSearch();
-  }, [state])
+  }, [state]);
+
+  // Extract HTML content from the AI response
+  const extractHtmlContent = (response) => {
+    try {
+      // First try to match HTML code block with explicit html tag
+      const htmlMatch = response.match(/```html\s*([\s\S]*?)\s*```/);
+      if (htmlMatch && htmlMatch[1]) {
+        return htmlMatch[1].trim();
+      }
+      
+      // Then try to match any code block that might contain HTML
+      const codeBlockMatch = response.match(/```([\s\S]*?)```/);
+      if (codeBlockMatch && codeBlockMatch[1]) {
+        // Check if it looks like HTML (contains HTML tags)
+        if (/<\/?[a-z][\s\S]*>/i.test(codeBlockMatch[1])) {
+          return codeBlockMatch[1].trim();
+        }
+      }
+      
+      // Fallback to the old method if the regex doesn't match
+      const parts = response.split("```");
+      if (parts.length >= 2) {
+        return parts[1].trim();
+      }
+      
+      // Last resort: return the whole response if it contains HTML tags
+      if (/<\/?[a-z][\s\S]*>/i.test(response)) {
+        return response;
+      }
+      
+      return `<div class="p-6">${response}</div>`;
+    } catch (err) {
+      console.error("Error extracting HTML content:", err);
+      return `<div class="p-6">${response}</div>`;
+    }
+  };
 
   return (
-    <div >
-      {
-        !answer && <LoadingSpinner />
-      }
-
-      {answer && (
-        <div style={{ marginTop: "20px", whiteSpace: "pre-wrap" }}>
-          <strong>Answer:</strong>
-          <p>{parse(answer.split("```")[1].slice(4).trim())}</p>
+    <motion.div 
+      className="relative w-full max-w-6xl mx-auto px-4 py-6"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      {/* Navigation and City name header */}
+      <div className="mb-8">
+        <Link to="/dashboard" className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-4 transition-colors">
+          <ArrowLeft size={18} className="mr-1" />
+          <span>Back to Dashboard</span>
+        </Link>
+        
+        <div className="flex items-center">
+          <div className="bg-blue-600 p-3 rounded-full mr-4">
+            <Globe className="text-white" size={28} />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800">{state}</h1>
+            <p className="text-gray-500">Detailed City Information</p>
+          </div>
         </div>
+      </div>
+
+      {/* Loading state */}
+      {loading && (
+        <motion.div 
+          className="flex flex-col items-center justify-center py-16 bg-white rounded-xl shadow-sm"
+          initial={{ y: 10, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+        >
+          <LoadingSpinner size="lg" className="text-blue-600" />
+          <p className="mt-6 text-gray-600 animate-pulse text-lg">Gathering comprehensive information about {state}...</p>
+          <div className="mt-4 flex flex-wrap justify-center gap-3">
+            <div className="flex items-center text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+              <Clock size={14} className="mr-1" />
+              <span className="text-sm">History</span>
+            </div>
+            <div className="flex items-center text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+              <Users size={14} className="mr-1" />
+              <span className="text-sm">Culture</span>
+            </div>
+            <div className="flex items-center text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+              <Building size={14} className="mr-1" />
+              <span className="text-sm">Economy</span>
+            </div>
+            <div className="flex items-center text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+              <Landmark size={14} className="mr-1" />
+              <span className="text-sm">Attractions</span>
+            </div>
+            <div className="flex items-center text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+              <Calendar size={14} className="mr-1" />
+              <span className="text-sm">Travel Tips</span>
+            </div>
+          </div>
+        </motion.div>
       )}
-    </div>
+
+      {/* Error state */}
+      {error && (
+        <motion.div 
+          className="bg-white rounded-xl shadow-md overflow-hidden mb-6"
+          initial={{ y: 10, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+        >
+          <div className="p-6 border-l-4 border-red-500">
+            <div className="flex items-start">
+              <div className="bg-red-100 p-2 rounded-full mr-4">
+                <AlertCircle className="text-red-500" size={24} />
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-red-800 mb-2">Unable to Load City Information</h3>
+                <p className="text-red-700 mb-4">{error}</p>
+                <button 
+                  onClick={handleSearch} 
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                >
+                  Try Again
+                </button>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Content display */}
+      {answer && !loading && (
+        <motion.div 
+          className="city-information-container bg-white rounded-xl shadow-lg overflow-hidden"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <div className={`city-content ${!showFullContent ? 'max-h-[1200px] overflow-hidden relative' : ''}`}>
+            {parse(extractHtmlContent(answer))}
+            
+            {!showFullContent && (
+              <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white to-transparent flex items-end justify-center pb-4">
+                <button 
+                  onClick={() => setShowFullContent(true)}
+                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md transition-all transform hover:scale-105"
+                >
+                  Show More
+                </button>
+              </div>
+            )}
+          </div>
+          
+          <div className="p-5 bg-blue-50 border-t border-blue-100 mt-2">
+            <div className="flex items-start max-w-3xl mx-auto">
+              <Info className="text-blue-600 mr-3 mt-0.5 flex-shrink-0" size={20} />
+              <div>
+                <p className="text-sm text-blue-800 font-medium">Information provided by AI</p>
+                <p className="text-xs text-blue-700 mt-1">Details may vary and should be verified before travel. This information is generated using AI and may not reflect the most current data.</p>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </motion.div>
   );
 };
 
