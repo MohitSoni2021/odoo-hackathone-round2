@@ -4,10 +4,11 @@ import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Globe, MapPin, Plane, Compass, LogIn } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginUser, clearError } from './AuthSlice';
 import { API_STATUS } from '../../utils/constants';
+import { SITE_INFO } from '../../utils/SITEINFO';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
 import Card from '../../components/common/Card';
@@ -22,6 +23,28 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { status, error, isAuthenticated } = useSelector((state) => state.auth);
+  
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+  
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        duration: 0.5
+      }
+    }
+  };
 
   const {
     register,
@@ -46,16 +69,41 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="max-w-md w-full"
+        className="max-w-md w-full relative z-10"
       >
-        <Card className="bg-white/80 backdrop-blur-sm border-white/20">
+        <div className="flex justify-center mb-6">
+          <motion.div 
+            className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg"
+            whileHover={{ scale: 1.05, rotate: 5 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Compass className="h-8 w-8 text-blue-600" />
+          </motion.div>
+        </div>
+        
+        <Card className="bg-white/90 backdrop-blur-md border border-white/30 shadow-xl">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 font-heading">Welcome Back</h2>
-            <p className="text-gray-600 mt-2">Sign in to your GlobeTrotter account</p>
+            <motion.h2 
+              className="text-3xl font-bold text-gray-900 font-heading"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              Welcome Back Explorer
+            </motion.h2>
+            <motion.p 
+              className="text-gray-600 mt-2"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+            >
+              Sign in to your {SITE_INFO.brandName} account to continue your journey
+            </motion.p>
           </div>
 
           {error && (
@@ -68,37 +116,47 @@ const LoginPage = () => {
             </motion.div>
           )}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <Input
-              {...register('email')}
-              type="email"
-              label="Email Address"
-              placeholder="Enter your email"
-              icon={<Mail size={18} />}
-              error={errors.email?.message}
-              required
-            />
+          <motion.form 
+            onSubmit={handleSubmit(onSubmit)} 
+            className="space-y-6"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <motion.div variants={itemVariants}>
+              <Input
+                {...register('email')}
+                type="email"
+                label="Email Address"
+                placeholder="Enter your email"
+                icon={<Mail size={18} className="text-blue-500" />}
+                error={errors.email?.message}
+                required
+                className="focus:border-blue-500 transition-all duration-300"
+              />
+            </motion.div>
 
-            <div className="relative">
+            <motion.div variants={itemVariants} className="relative">
               <Input
                 {...register('password')}
                 type={showPassword ? 'text' : 'password'}
                 label="Password"
                 placeholder="Enter your password"
-                icon={<Lock size={18} />}
+                icon={<Lock size={18} className="text-blue-500" />}
                 error={errors.password?.message}
                 required
+                className="focus:border-blue-500 transition-all duration-300"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-10 text-gray-400 hover:text-gray-600"
+                className="absolute right-3 top-10 text-gray-400 hover:text-blue-500 transition-colors duration-300"
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
-            </div>
+            </motion.div>
 
-            <div className="flex items-center justify-between">
+            <motion.div variants={itemVariants} className="flex items-center justify-between">
               <div className="flex items-center">
                 <input
                   id="remember-me"
@@ -114,35 +172,55 @@ const LoginPage = () => {
               <div className="text-sm">
                 <Link
                   to="/forgot-password"
-                  className="font-medium text-blue-600 hover:text-blue-500"
+                  className="font-medium text-blue-600 hover:text-blue-500 transition-colors duration-300"
                 >
                   Forgot your password?
                 </Link>
               </div>
-            </div>
+            </motion.div>
 
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              loading={status === API_STATUS.LOADING}
-              className="w-full"
-            >
-              Sign In
-            </Button>
-          </form>
+            <motion.div variants={itemVariants}>
+              <Button
+                type="submit"
+                variant="primary"
+                size="lg"
+                loading={status === API_STATUS.LOADING}
+                className="w-full bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600 transition-all duration-300 flex items-center justify-center gap-2"
+              >
+                <LogIn size={18} />
+                Begin Your Journey
+              </Button>
+            </motion.div>
+          </motion.form>
 
-          <div className="mt-8 text-center">
+          <motion.div 
+            className="mt-8 text-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+          >
             <p className="text-gray-600">
-              Don't have an account?{' '}
+              Ready to start your adventure?{' '}
               <Link
                 to="/signup"
-                className="font-medium text-blue-600 hover:text-blue-500"
+                className="font-medium text-blue-600 hover:text-blue-500 transition-colors duration-300"
               >
-                Sign up here
+                Create an account
               </Link>
             </p>
-          </div>
+          </motion.div>
+          
+          <motion.div 
+            className="mt-6 pt-6 border-t border-gray-200 text-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.7 }}
+          >
+            <p className="text-xs text-gray-500 flex items-center justify-center gap-1">
+              <MapPin size={12} className="text-blue-500" />
+              {SITE_INFO.tagline}
+            </p>
+          </motion.div>
         </Card>
       </motion.div>
     </div>
