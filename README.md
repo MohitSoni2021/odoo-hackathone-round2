@@ -3,6 +3,8 @@
 ![GlobeTrotter](https://img.shields.io/badge/GlobeTrotter-Travel%20Planner-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
+# [Video Link](https://youtu.be/QLRdSAYtyYY)
+
 ## 🌍 Overview
 
 GlobeTrotter is a comprehensive travel planning platform that helps users create personalized trip itineraries, manage travel budgets, and share their adventures. Built with a modern tech stack, it offers a feature-rich experience for travel enthusiasts.
