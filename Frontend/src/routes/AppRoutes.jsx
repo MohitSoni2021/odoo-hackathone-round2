@@ -5,10 +5,8 @@ import LoadingSpinner from '../components/common/LoadingSpinner';
 
 // Public Pages
 import HomePage from '../pages/HomePage';
-// import AboutPage from '../pages/AboutPage'; // File does not exist
-const AboutPage = () => <div>About Page (Placeholder)</div>;
-// import ContactPage from '../pages/ContactPage'; // File does not exist
-const ContactPage = () => <div>Contact Page (Placeholder)</div>;
+import AboutPage from '../pages/AboutPage';
+import ContactPage from '../pages/ContactPage';
 
 // Auth Pages
 import LoginPage from '../features/auth/LoginPage';
