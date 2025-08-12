@@ -6,17 +6,19 @@ import { store } from './app/store.ts';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import AppRoutes from './routes/AppRoutes';
+import { ChatBotProvider } from './components/chatbot/ChatBotProvider';
 
 function App() {
   return (
     <Provider store={store}>
       <Router>
-        <div className="flex flex-col min-h-screen bg-gray-50">
-          <Navbar />
-          <main className="flex-1">
-            <AppRoutes />
-          </main>
-          <Footer />
+        <ChatBotProvider>
+          <div className="flex flex-col min-h-screen bg-gray-50">
+            <Navbar />
+            <main className="flex-1">
+              <AppRoutes />
+            </main>
+            <Footer />
           <Toaster
             position="top-right"
             toastOptions={{
@@ -44,7 +46,8 @@ function App() {
               }
             }}
           />
-        </div>
+          </div>
+        </ChatBotProvider>
       </Router>
     </Provider>
   );
